@@ -1,8 +1,10 @@
 package com.inKspire.app.service;
 
 import com.inKspire.app.model.Blog;
+import com.inKspire.app.model.Bookmark;
 import com.inKspire.app.model.Tag;
 import com.inKspire.app.repository.BlogRepository;
+import com.inKspire.app.repository.BookmarkRepository;
 import com.inKspire.app.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,9 @@ public class BlogService {
     private BlogRepository blogRepository;
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
 
     public Blog createBlog(Blog blog) {
         if (blog.getTags() != null) {
@@ -45,6 +50,13 @@ public class BlogService {
 
     public void deleteBlogById(Long id) {
         Blog blog = blogRepository.findById(id).orElseThrow(() -> new RuntimeException("blog do not exist"));
+        // Unlink this blog from all bookmarks
+        List<Bookmark> bookmarks = bookmarkRepository.findByBlog(blog);
+        for (Bookmark bookmark : bookmarks) {
+            bookmarkRepository.delete(bookmark);
+        }
+
+        // Unlink this blog from all tags
         for(Tag tag : blog.getTags()) {
             tag.getBlogs().remove(blog);
             tagRepository.save(tag);
