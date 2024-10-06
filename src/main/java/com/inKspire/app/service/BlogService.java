@@ -22,6 +22,11 @@ public class BlogService {
     private TagRepository tagRepository;
 
     public Blog createBlog(Blog blog) {
+        if (blog.getTags() != null) {
+            Set<Tag> tagsToAdd = getTagsFromTagObjects(blog.getTags());
+            blog.getTags().clear();
+            blog.getTags().addAll(tagsToAdd);
+        }
         blog.setCreatedAt(LocalDateTime.now());
         blog.setUpdatedAt(LocalDateTime.now());
         return blogRepository.save(blog);
@@ -50,7 +55,8 @@ public class BlogService {
                     blog.setIsPublished(updatedBlog.getIsPublished());
                     blog.setUpdatedAt(LocalDateTime.now());
                     if(updatedBlog.getTags() != null) {
-                        blog.getTags().addAll(updatedBlog.getTags());
+                        Set<Tag> tagsToAdd = getTagsFromTagObjects(updatedBlog.getTags());
+                        blog.getTags().addAll(tagsToAdd);
                     }
                     return blogRepository.save(blog);
                 }).orElseThrow(() -> new RuntimeException("Blog not found"));
@@ -70,5 +76,10 @@ public class BlogService {
             blog.getTags().removeAll(tagsToRemove);
             return blogRepository.save(blog);
         }).orElseThrow(() -> new RuntimeException("blog not found"));
+    }
+
+    public Set<Tag> getTagsFromTagObjects(Set<Tag> tags) {
+        Set<Long> tagIds = tags.stream().map(Tag::getTagId).collect(Collectors.toSet());
+        return new HashSet<>(tagRepository.findAllById(tagIds));
     }
 }
