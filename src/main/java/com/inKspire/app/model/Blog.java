@@ -27,7 +27,7 @@ public class Blog {
     private int viewCount;
     private int likeCount;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JsonIgnoreProperties("blogs")
     @JoinTable(
             name = "blogTags",

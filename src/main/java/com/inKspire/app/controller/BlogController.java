@@ -35,6 +35,11 @@ public class BlogController {
         return blogService.getAllBlogsOfAuthor(authorId);
     }
 
+    @GetMapping("/tag")
+    public Set<Blog> getAllBlogsByTagId(@RequestParam Long tagId) {
+        return blogService.getBlogsByTagId(tagId);
+    }
+
     @PutMapping("/{blogId}")
     public Blog updateBlog(@PathVariable Long blogId, @RequestBody Blog updatedBlog) {
         return blogService.updateBlog(blogId, updatedBlog);

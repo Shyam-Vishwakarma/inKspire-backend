@@ -1,6 +1,8 @@
 package com.inKspire.app.service;
 
+import com.inKspire.app.model.Blog;
 import com.inKspire.app.model.Tag;
+import com.inKspire.app.repository.BlogRepository;
 import com.inKspire.app.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,9 @@ public class TagService {
     @Autowired
     private TagRepository tagRepository;
 
+    @Autowired
+    private BlogRepository blogRepository;
+
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
     }
@@ -20,6 +25,11 @@ public class TagService {
     }
 
     public void deleteTag(Long tagId) {
+        Tag tag = tagRepository.findById(tagId).orElseThrow(() -> new RuntimeException("tag do not exist"));
+        for(Blog blog : tag.getBlogs()) {
+            blog.getTags().remove(tag);
+            blogRepository.save(blog);
+        }
         tagRepository.deleteById(tagId);
     }
 

@@ -44,6 +44,11 @@ public class BlogService {
     }
 
     public void deleteBlogById(Long id) {
+        Blog blog = blogRepository.findById(id).orElseThrow(() -> new RuntimeException("blog do not exist"));
+        for(Tag tag : blog.getTags()) {
+            tag.getBlogs().remove(blog);
+            tagRepository.save(tag);
+        }
         blogRepository.deleteById(id);
     }
 
@@ -76,6 +81,12 @@ public class BlogService {
             blog.getTags().removeAll(tagsToRemove);
             return blogRepository.save(blog);
         }).orElseThrow(() -> new RuntimeException("blog not found"));
+    }
+
+    public Set<Blog> getBlogsByTagId(Long tagId) {
+        Tag tag = tagRepository.findById(tagId).orElseThrow(() ->
+                new RuntimeException("tag do not exist"));
+        return tag.getBlogs();
     }
 
     public Set<Tag> getTagsFromTagObjects(Set<Tag> tags) {
